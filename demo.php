@@ -3,7 +3,11 @@
 require_once 'vendor/autoload.php';
 use splitbrain\RingIcon\RingIcon;
 
-$ringicon = new RingIcon(128);
+// define size and number of rings
+$ringicon = new RingIcon(128, 3);
+
+// decide if monochrome image is wanted
+$ringicon->setMono(false);
 
 // completely random image directly output to browser
 $ringicon->createImage();

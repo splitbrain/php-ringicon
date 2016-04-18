@@ -21,6 +21,8 @@ class RingIcon
     protected $center;
     protected $ringwidth;
     protected $seed;
+    protected $ismono = false;
+    protected $monocolor = null;
 
     /**
      * RingIcon constructor.
@@ -40,22 +42,6 @@ class RingIcon
     }
 
     /**
-     * Generate number from seed
-     *
-     * Each call runs MD5 on the seed again
-     *
-     * @param int $min
-     * @param int $max
-     * @return int
-     */
-    protected function rand($min, $max)
-    {
-        $this->seed = md5($this->seed);
-        $rand = hexdec(substr($this->seed, 0, 8));
-        return ($rand % ($max - $min + 1)) + $min;
-    }
-
-    /**
      * Generates an ring image
      *
      * If a seed is given, the image will be based on that seed
@@ -69,6 +55,17 @@ class RingIcon
             $seed = mt_rand() . time();
         }
         $this->seed = $seed;
+
+        // monochrome wanted?
+        if($this->ismono) {
+            $this->monocolor = array(
+                $this->rand(20,255),
+                $this->rand(20,255),
+                $this->rand(20,255)
+            );
+        } else {
+            $this->monocolor = null;
+        }
 
         // create
         $image = $this->createTransparentImage($this->fullsize, $this->fullsize);
@@ -92,6 +89,31 @@ class RingIcon
     }
 
     /**
+     * When set to true a monochrome version is returned
+     *
+     * @param bool $ismono
+     */
+    public function setMono($ismono) {
+        $this->ismono = $ismono;
+    }
+
+    /**
+     * Generate number from seed
+     *
+     * Each call runs MD5 on the seed again
+     *
+     * @param int $min
+     * @param int $max
+     * @return int
+     */
+    protected function rand($min, $max)
+    {
+        $this->seed = md5($this->seed);
+        $rand = hexdec(substr($this->seed, 0, 8));
+        return ($rand % ($max - $min + 1)) + $min;
+    }
+
+    /**
      * Drawas a single ring
      *
      * @param resource $image
@@ -104,9 +126,9 @@ class RingIcon
 
         $start = $this->rand(20, 360);
         $stop = $this->rand(20, 360);
-        if(abs($stop - $start) < 20) $stop += 20;
+        if($stop < $start) list($start, $stop) = array($stop, $start);
 
-        imagefilledarc($image, $this->center, $this->center, $arcwidth, $arcwidth, $start, $stop, $color, IMG_ARC_PIE);
+        imagefilledarc($image, $this->center, $this->center, $arcwidth, $arcwidth, $stop, $start, $color, IMG_ARC_PIE);
         imagefilledellipse($image, $this->center, $this->center, $arcwidth - $this->ringwidth,
             $arcwidth - $this->ringwidth, $transparency);
 
@@ -133,6 +155,9 @@ class RingIcon
      */
     protected function randomColor($image)
     {
+        if($this->ismono) {
+            return imagecolorallocatealpha($image, $this->monocolor[0], $this->monocolor[1], $this->monocolor[2], $this->rand(0, 96));
+        }
         return imagecolorallocate($image, $this->rand(0, 255), $this->rand(0, 255), $this->rand(0, 255));
     }
 
