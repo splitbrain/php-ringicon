@@ -1,0 +1,21 @@
+{
+    "name": "splitbrain/php-ringicon",
+    "description": "A indenticon/glyphicon like avatar generator",
+    "keywords": ["identicon", "glyphicon", "avatar"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Andreas Gohr",
+            "email": "andi@splitbrain.org"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.0",
+        "ext-gd": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "splitbrain\\RingIcon\\": "src"
+        }
+    }
+}
