@@ -33,7 +33,7 @@ class RingIcon
     {
         $this->size = $size;
         $this->fullsize = $this->size * 5;
-        $this->rings = 4;
+        $this->rings = $rings;
 
         $this->center = floor($this->fullsize / 2);
         $this->ringwidth = floor($this->fullsize / $rings);
