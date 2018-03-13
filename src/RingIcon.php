@@ -2,45 +2,9 @@
 
 namespace splitbrain\RingIcon;
 
-/**
- * Class RingIcon
- *
- * Generates a identicon/visiglyph like image based on concentric rings
- *
- * @todo add a mono color version
- * @author Andreas Gohr <andi@splitbrain.org>
- * @license MIT
- * @package splitbrain\RingIcon
- */
-class RingIcon
+
+class RingIcon extends AbstractRingIcon
 {
-
-    protected $size;
-    protected $fullsize;
-    protected $rings;
-    protected $center;
-    protected $ringwidth;
-    protected $seed;
-    protected $ismono = false;
-    protected $monocolor = null;
-
-    /**
-     * RingIcon constructor.
-     * @param int $size width and height of the resulting image
-     * @param int $rings number of rings
-     */
-    public function __construct($size, $rings = 3)
-    {
-        $this->size = $size;
-        $this->fullsize = $this->size * 5;
-        $this->rings = $rings;
-
-        $this->center = floor($this->fullsize / 2);
-        $this->ringwidth = floor($this->fullsize / $rings);
-
-        $this->seed = mt_rand() . time();
-    }
-
     /**
      * Generates an ring image
      *
@@ -58,13 +22,7 @@ class RingIcon
 
         // monochrome wanted?
         if($this->ismono) {
-            $this->monocolor = array(
-                $this->rand(20,255),
-                $this->rand(20,255),
-                $this->rand(20,255)
-            );
-        } else {
-            $this->monocolor = null;
+            $this->generateMonoColor();
         }
 
         // create
@@ -88,30 +46,6 @@ class RingIcon
         imagedestroy($image);
     }
 
-    /**
-     * When set to true a monochrome version is returned
-     *
-     * @param bool $ismono
-     */
-    public function setMono($ismono) {
-        $this->ismono = $ismono;
-    }
-
-    /**
-     * Generate number from seed
-     *
-     * Each call runs MD5 on the seed again
-     *
-     * @param int $min
-     * @param int $max
-     * @return int
-     */
-    protected function rand($min, $max)
-    {
-        $this->seed = md5($this->seed);
-        $rand = hexdec(substr($this->seed, 0, 8));
-        return ($rand % ($max - $min + 1)) + $min;
-    }
 
     /**
      * Drawas a single ring
@@ -182,5 +116,4 @@ class RingIcon
         imagesavealpha($image, true);
         return $image;
     }
-
 }
