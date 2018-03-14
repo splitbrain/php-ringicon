@@ -5,6 +5,13 @@ namespace splitbrain\RingIcon;
 
 class RingIconSVG extends AbstractRingIcon
 {
+    public function __construct($size, $rings = 3)
+    {
+        parent::__construct($size, $rings);
+        // we don't downscale
+        $this->center = floor($this->size / 2);
+        $this->ringwidth = floor($this->size / $rings);
+    }
 
     /**
      * Generates an ring image svg suitable for inlining in html
@@ -15,7 +22,8 @@ class RingIconSVG extends AbstractRingIcon
      *
      * @return string
      */
-    public function getInlineSVG($seed = '') {
+    public function getInlineSVG($seed = '')
+    {
         return $this->generateSVGImage($seed);
     }
 
@@ -27,7 +35,8 @@ class RingIconSVG extends AbstractRingIcon
      * @param string $seed initialize the genrator with this string
      * @param string $file if given, the image is saved at that path, otherwise is printed as file to browser
      */
-    public function createImage($seed = '', $file = '') {
+    public function createImage($seed = '', $file = '')
+    {
         $svg = $this->generateSVGImage($seed, true);
         if ($file) {
             file_put_contents($file, $svg);
@@ -42,33 +51,45 @@ class RingIconSVG extends AbstractRingIcon
      *
      * If a seed is given, the image will be based on that seed
      *
-     * @param string $seed  initialize the genrator with this string
-     * @param bool   $file  if true, the svg will have the markup suitable for being delivered as file
+     * @param string $seed initialize the genrator with this string
+     * @param bool $file if true, the svg will have the markup suitable for being delivered as file
      *
      * @return string
      */
-    protected function generateSVGImage($seed = '', $file = false) {
+    protected function generateSVGImage($seed = '', $file = false)
+    {
         if (!$seed) {
             $seed = mt_rand() . time();
         }
         $this->seed = $seed;
 
         // monochrome wanted?
-        if($this->ismono) {
+        if ($this->ismono) {
             $this->generateMonoColor();
         }
 
-        $svgFileAttributes = $file ?
-            'xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1"'
-            : ''
-        ;
+        if ($file) {
+            $svgFileAttributes = array(
+                'xmlns' => 'http://www.w3.org/2000/svg',
+                'version' => '1.1',
+                'width' => $this->size,
+                'height' => $this->size,
+            );
+            $svgFileAttributes = implode(' ', array_map(
+                function ($k, $v) {
+                    return $k . '="' . htmlspecialchars($v) . '"';
+                },
+                array_keys($svgFileAttributes), $svgFileAttributes
+            ));
+        } else {
+            $svgFileAttributes = '';
+        }
 
-        $svg = "<svg $svgFileAttributes viewBox=\"0 0 $this->fullsize $this->fullsize\">";
-        $svg .= "<!-- seed to generate this svg: $this->seed -->";
-        $arcOuterRadious = $this->fullsize/2;
+        $svg = "<svg $svgFileAttributes viewBox=\"0 0 $this->size $this->size\">";
+        $arcOuterRadious = $this->size / 2;
         for ($i = $this->rings; $i > 0; $i--) {
             $svg .= $this->createSVGArcPath($arcOuterRadious);
-            $arcOuterRadious -= $this->ringwidth/2;
+            $arcOuterRadious -= $this->ringwidth / 2;
         }
         $svg .= '</svg>';
 
@@ -88,12 +109,13 @@ class RingIconSVG extends AbstractRingIcon
      *
      * @return string
      */
-    protected function createSVGArcPath($outerRadius) {
+    protected function createSVGArcPath($outerRadius)
+    {
         $color = $this->randomCssColor();
-        $ringThickness = $this->ringwidth/2;
+        $ringThickness = $this->ringwidth / 2;
         $startAngle = $this->rand(20, 360);
         $stopAngle = $this->rand(20, 360);
-        if($stopAngle < $startAngle) {
+        if ($stopAngle < $startAngle) {
             list($startAngle, $stopAngle) = array($stopAngle, $startAngle);
         }
 
@@ -103,11 +125,11 @@ class RingIconSVG extends AbstractRingIcon
         $innerRadius = $outerRadius - $ringThickness;
         $SweepFlag = 0;
         $innerSweepFlag = 1;
-        $largeArcFlag = (int) ($stopAngle-$startAngle < 180);
+        $largeArcFlag = (int)($stopAngle - $startAngle < 180);
         list ($xInnerStart, $yInnerStart) = $this->polarToCartesian($outerRadius - $ringThickness, $stopAngle);
         list ($xInnerEnd, $yInnerEnd) = $this->polarToCartesian($outerRadius - $ringThickness, $startAngle);
 
-        $fullPath = "<path fill='$color' stroke=\"#000000\" d='
+        $fullPath = "<path fill='$color' d='
             M $xStart $yStart
             A $outerRadius $outerRadius 0 $largeArcFlag $SweepFlag $xOuterEnd $yOuterEnd
             L $xInnerStart $yInnerStart
@@ -122,9 +144,10 @@ class RingIconSVG extends AbstractRingIcon
      *
      * @return string
      */
-    protected function randomCssColor() {
-        if($this->ismono) {
-            $alpha = 1 - $this->rand(0, 96)/100;
+    protected function randomCssColor()
+    {
+        if ($this->ismono) {
+            $alpha = 1 - $this->rand(0, 96) / 100;
             return "rgba({$this->monocolor[0]}, {$this->monocolor[1]}, {$this->monocolor[2]}, $alpha)";
         }
         $r = $this->rand(0, 255);
@@ -148,8 +171,8 @@ class RingIconSVG extends AbstractRingIcon
         $angleInRadians = $angleInDegrees * M_PI / 180.0;
 
         return array(
-            $this->fullsize/2 + ($radius * cos($angleInRadians)),
-            $this->fullsize/2 + ($radius * sin($angleInRadians)),
+            $this->size / 2 + ($radius * cos($angleInRadians)),
+            $this->size / 2 + ($radius * sin($angleInRadians)),
         );
     }
 

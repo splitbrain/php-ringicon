@@ -7,7 +7,6 @@ namespace splitbrain\RingIcon;
  *
  * Generates a identicon/visiglyph like image based on concentric rings
  *
- * @todo add a mono color version
  * @author Andreas Gohr <andi@splitbrain.org>
  * @license MIT
  * @package splitbrain\RingIcon
